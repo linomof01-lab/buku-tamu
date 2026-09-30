@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Buku Tamu</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg"></div>
+
+  <header>
+    <p class="school">SMK 1 MALUKU TENGAH</p>
+    <h1>🔐 Panel Admin</h1>
+    <p class="sub">Kelola data buku tamu</p>
+  </header>
+
+  <main class="container">
+    <div class="card" id="loginCard">
+      <h2>Login Admin</h2>
+      <input type="password" id="password" placeholder="Masukkan password admin" />
+      <button id="btnKirim">Login</button>
+      <small id="status"></small>
+    </div>
+
+    <div id="adminPanel" style="display:none">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px;">
+          <h2 style="margin:0;">Daftar Tamu</h2>
+          <button id="btnLogout">Logout</button>
+        </div>
+        <div id="list" class="list"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+  <small>© 2026 Buku Tamu Digital • Dibuat oleh <b>Paul XI TJKT1</b> • <a href="/" style="color:#94a3b8; text-decoration:none;">← Buku Tamu</a></small>
+</footer>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    async function cekLogin() {
+      const res = await fetch('/api/me');
+      const data = await res.json();
+      if (data.isAdmin) showAdmin();
+      else showLogin();
+    }
+
+    function showLogin() {
+      $('loginCard').style.display = 'block';
+      $('adminPanel').style.display = 'none';
+    }
+
+    function showAdmin() {
+      $('loginCard').style.display = 'none';
+      $('adminPanel').style.display = 'block';
+      loadList();
+    }
+
+    $('btnKirim').addEventListener('click', async () => {
+      const password = $('password').value;
+      const status = $('status');
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      if (res.ok) {
+        $('password').value = '';
+        status.textContent = '';
+        showAdmin();
+      } else {
+        status.style.color = '#f87171';
+        status.textContent = '❌ Password salah!';
+      }
+    });
+
+    $('password').addEventListener('keypress', e => {
+      if (e.key === 'Enter') $('btnKirim').click();
+    });
+
+    $('btnLogout').addEventListener('click', async () => {
+      await fetch('/api/logout', { method: 'POST' });
+      showLogin();
+    });
+
+    async function loadList() {
+      const res = await fetch('/api/tamu');
+      const data = await res.json();
+      const list = $('list');
+      if (!data.length) {
+        list.innerHTML = '<p class="empty">Belum ada tamu.</p>';
+        return;
+      }
+      list.innerHTML = data.map(t => `
+        <div class="entry">
+          <div class="head">
+            <div>
+              <b>${esc(t.nama)}</b>
+              ${t.asal ? `<span class="asal"> • ${esc(t.asal)}</span>` : ''}
+            </div>
+            <div>
+              <small>${relatif(t.waktu)}</small>
+              <button class="del" onclick="hapus(${t.id})" title="Hapus">✕</button>
+            </div>
+          </div>
+          <p>${esc(t.pesan)}</p>
+        </div>
+      `).join('');
+    }
+
+    async function hapus(id) {
+      if (!confirm('Hapus data tamu ini?')) return;
+      const res = await fetch('/api/tamu/' + id, { method: 'DELETE' });
+      if (res.status === 401) {
+        alert('Sesi habis, silakan login ulang');
+        showLogin();
+        return;
+      }
+      loadList();
+    }
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => (
+        { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
+      ));
+    }
+
+    function relatif(tgl) {
+      const d = new Date(tgl.replace(' ', 'T') + 'Z');
+      const s = Math.floor((Date.now() - d) / 1000);
+      if (s < 60) return 'baru saja';
+      if (s < 3600) return Math.floor(s / 60) + ' menit lalu';
+      if (s < 86400) return Math.floor(s / 3600) + ' jam lalu';
+      if (s < 604800) return Math.floor(s / 86400) + ' hari lalu';
+      return d.toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
+    }
+
+    cekLogin();
+    setInterval(() => {
+      if ($('adminPanel').style.display !== 'none') loadList();
+    }, 10000);
+  </script>
+</body>
+</html>

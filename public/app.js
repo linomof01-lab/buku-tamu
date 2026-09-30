@@ -23,10 +23,7 @@ function renderList(data) {
           <b>${esc(t.nama)}</b>
           ${t.asal ? `<span class="asal"> • ${esc(t.asal)}</span>` : ''}
         </div>
-        <div>
-          <small>${relatif(t.waktu)}</small>
-          <button class="del" onclick="hapus(${t.id})" title="Hapus">✕</button>
-        </div>
+        <small>${relatif(t.waktu)}</small>
       </div>
       <p>${esc(t.pesan)}</p>
     </div>
@@ -66,12 +63,6 @@ $('btnKirim').addEventListener('click', async () => {
     $('btnKirim').disabled = false;
   }
 });
-
-async function hapus(id) {
-  if (!confirm('Hapus data tamu ini?')) return;
-  await fetch('/api/tamu/' + id, { method: 'DELETE' });
-  loadAll();
-}
 
 $('search').addEventListener('input', e => {
   const q = e.target.value.toLowerCase();

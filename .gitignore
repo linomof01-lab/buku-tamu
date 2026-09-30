@@ -3,3 +3,6 @@ tamu.db
 .env
 *.log
 .DS_Store
+.env
+cloudflared.exe
+ngrok.exe

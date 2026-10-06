@@ -1,5 +1,5 @@
 // ==== KONEKSI TURSO ====
-import { createClient } from 'https://esm.sh/@libsql/client/web@0.15.0';
+import { createClient } from 'https://esm.sh/@libsql/client@0.15.0/web';
 
 const db = createClient({
   url: 'libsql://buku-tamu-linomof01-lab.aws-ap-northeast-1.turso.io',

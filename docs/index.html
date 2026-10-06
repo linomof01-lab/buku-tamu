@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buku Tamu Digital</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg"></div>
+
+  <header>
+    <p class="school">SMK 1 MALUKU TENGAH</p>
+    <h1>📖 Buku Tamu Digital</h1>
+    <p class="sub">Silakan isi kehadiran Anda</p>
+  </header>
+
+  <section class="stats">
+    <div class="stat-card">
+      <span class="num" id="statTotal">0</span>
+      <span class="label">Total Tamu</span>
+    </div>
+    <div class="stat-card">
+      <span class="num" id="statHariIni">0</span>
+      <span class="label">Hari Ini</span>
+    </div>
+  </section>
+
+  <main class="container">
+    <div class="card form-card">
+      <h2>Isi Buku Tamu</h2>
+      <input id="nama" placeholder="Nama lengkap" maxlength="60">
+      <input id="asal" placeholder="Asal / Instansi (opsional)" maxlength="80">
+      <textarea id="pesan" rows="3" placeholder="Pesan, kesan, atau tujuan kunjungan..." maxlength="300"></textarea>
+      <button id="btnKirim">Kirim 🚀</button>
+      <small id="status"></small>
+    </div>
+
+    <div class="card list-card">
+      <div class="list-head">
+        <h2>Daftar Tamu</h2>
+        <input id="search" placeholder="🔍 Cari nama...">
+      </div>
+      <div id="list" class="list"></div>
+    </div>
+  </main>
+
+  <footer>
+  <small>© 2026 Buku Tamu Digital • Dibuat oleh <b>Paul XI TJKT1</b> • <a href="/admin.html" style="color:#64748b; text-decoration:none;">🔐 Admin</a></small>
+</footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

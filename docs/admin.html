@@ -16,13 +16,15 @@
   </header>
 
   <main class="container">
+    <!-- Login Form -->
     <div class="card" id="loginCard">
       <h2>Login Admin</h2>
       <input type="password" id="password" placeholder="Masukkan password admin" />
-      <button id="btnKirim">Login</button>
+      <button id="btnLogin">Login</button>
       <small id="status"></small>
     </div>
 
+    <!-- Admin Panel -->
     <div id="adminPanel" style="display:none">
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px;">
@@ -35,17 +37,24 @@
   </main>
 
   <footer>
-  <small>© 2026 Buku Tamu Digital • Dibuat oleh <b>Paul XI TJKT1</b> • <a href="/" style="color:#94a3b8; text-decoration:none;">← Buku Tamu</a></small>
-</footer>
+    <small>© 2025 Buku Tamu Digital • <a href="/" style="color:#94a3b8; text-decoration:none;">← Buku Tamu</a></small>
+  </footer>
 
-  <script>
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@libsql/client@0.18.0/web';
+
+    const db = createClient({
+      url: 'libsql://buku-tamu-linomof01-lab.aws-ap-northeast-1.turso.io',
+      authToken: 'GANTI_TOKEN_TURSO_DISINI'
+    });
+
+    const ADMIN_PASSWORD = 'admin123';
+    const STORAGE_KEY = 'bukuTamuAdmin';
+
     const $ = id => document.getElementById(id);
 
-    async function cekLogin() {
-      const res = await fetch('/api/me');
-      const data = await res.json();
-      if (data.isAdmin) showAdmin();
-      else showLogin();
+    function isLoggedIn() {
+      return sessionStorage.getItem(STORAGE_KEY) === 'yes';
     }
 
     function showLogin() {
@@ -59,15 +68,12 @@
       loadList();
     }
 
-    $('btnKirim').addEventListener('click', async () => {
+    // Login
+    $('btnLogin').addEventListener('click', () => {
       const password = $('password').value;
       const status = $('status');
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
-      });
-      if (res.ok) {
+      if (password === ADMIN_PASSWORD) {
+        sessionStorage.setItem(STORAGE_KEY, 'yes');
         $('password').value = '';
         status.textContent = '';
         showAdmin();
@@ -77,51 +83,64 @@
       }
     });
 
+    // Enter untuk login
     $('password').addEventListener('keypress', e => {
-      if (e.key === 'Enter') $('btnKirim').click();
+      if (e.key === 'Enter') $('btnLogin').click();
     });
 
-    $('btnLogout').addEventListener('click', async () => {
-      await fetch('/api/logout', { method: 'POST' });
+    // Logout
+    $('btnLogout').addEventListener('click', () => {
+      sessionStorage.removeItem(STORAGE_KEY);
       showLogin();
     });
 
+    // Load list
     async function loadList() {
-      const res = await fetch('/api/tamu');
-      const data = await res.json();
-      const list = $('list');
-      if (!data.length) {
-        list.innerHTML = '<p class="empty">Belum ada tamu.</p>';
-        return;
-      }
-      list.innerHTML = data.map(t => `
-        <div class="entry">
-          <div class="head">
-            <div>
-              <b>${esc(t.nama)}</b>
-              ${t.asal ? `<span class="asal"> • ${esc(t.asal)}</span>` : ''}
+      try {
+        const res = await db.execute('SELECT * FROM tamu ORDER BY id DESC');
+        const data = res.rows;
+        const list = $('list');
+        if (!data.length) {
+          list.innerHTML = '<p class="empty">Belum ada tamu.</p>';
+          return;
+        }
+        list.innerHTML = data.map(t => `
+          <div class="entry">
+            <div class="head">
+              <div>
+                <b>${esc(t.nama)}</b>
+                ${t.asal ? `<span class="asal"> • ${esc(t.asal)}</span>` : ''}
+              </div>
+              <div>
+                <small>${relatif(t.waktu)}</small>
+                <button class="del" onclick="hapus(${t.id})" title="Hapus">✕</button>
+              </div>
             </div>
-            <div>
-              <small>${relatif(t.waktu)}</small>
-              <button class="del" onclick="hapus(${t.id})" title="Hapus">✕</button>
-            </div>
+            <p>${esc(t.pesan)}</p>
           </div>
-          <p>${esc(t.pesan)}</p>
-        </div>
-      `).join('');
-    }
-
-    async function hapus(id) {
-      if (!confirm('Hapus data tamu ini?')) return;
-      const res = await fetch('/api/tamu/' + id, { method: 'DELETE' });
-      if (res.status === 401) {
-        alert('Sesi habis, silakan login ulang');
-        showLogin();
-        return;
+        `).join('');
+      } catch (err) {
+        console.error(err);
+        $('list').innerHTML = '<p class="empty">❌ Gagal memuat data.</p>';
       }
-      loadList();
     }
 
+    // Hapus (global biar bisa dipanggil dari onclick)
+    window.hapus = async function(id) {
+      if (!confirm('Hapus data tamu ini?')) return;
+      try {
+        await db.execute({
+          sql: 'DELETE FROM tamu WHERE id = ?',
+          args: [id]
+        });
+        loadList();
+      } catch (err) {
+        console.error(err);
+        alert('Gagal menghapus data.');
+      }
+    };
+
+    // Helper
     function esc(s) {
       return String(s).replace(/[&<>"']/g, c => (
         { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
@@ -138,10 +157,9 @@
       return d.toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
     }
 
-    cekLogin();
-    setInterval(() => {
-      if ($('adminPanel').style.display !== 'none') loadList();
-    }, 10000);
+    // Init
+    if (isLoggedIn()) showAdmin();
+    else showLogin();
   </script>
 </body>
 </html>

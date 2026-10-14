@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@libsql/client/web@0.15.0';
 
 const db = createClient({
   url: 'libsql://buku-tamu-linomof01-lab.aws-ap-northeast-1.turso.io',
-  authToken: 'GANTI_DENGAN_TOKEN_TURSO_ANDA'
+  authToken: ''
 });
 
 const $ = id => document.getElementById(id);

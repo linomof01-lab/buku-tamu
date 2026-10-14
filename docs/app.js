@@ -3,8 +3,8 @@ import { createClient } from 'https://esm.sh/@libsql/client@0.18.0/web';
 
 const db = createClient({
   url: 'libsql://buku-tamu-linomof01-lab.aws-ap-northeast-1.turso.io',
-  authToken: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTE5NDAyMTUsImlkIjoiMDFhMGYwZmMtYTgwMS03YWI5LWEwNzItNDNhZWMwMmU2M2Y4Iiwia2lkIjoiRjNQMDd1cTdoclhZblJESWlmc0dMOWgtc0ctWDJqLTRsa1NzRFhFb2ZXOCIsInJpZCI6IjdlNDM0Njc2LTdmZmUtNDc0Yi04ZTVkLTZlOTc2MzRmNDAwYiJ9.zkAsdFePzuz9qGMtUaLjjn2t-S_2VBk051fzdkQ-ra8dg6e2rJaIk6EHg3K8Eyso7T45ekZNhm_rz2ApdQphCA
-'
+  authToken: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTE5NDAyMTUsImlkIjoiMDFhMGYwZmMtYTgwMS03YWI5LWEwNzItNDNhZWMwMmU2M2Y4Iiwia2lkIjoiRjNQMDd1cTdoclhZblJESWlmc0dMOWgtc0ctWDJqLTRsa1NzRFhFb2ZXOCIsInJpZCI6IjdlNDM0Njc2LTdmZmUtNDc0Yi04ZTVkLTZlOTc2MzRmNDAwYiJ9.zkAsdFePzuz9qGMtUaLjjn2t-S_2VBk051fzdkQ-ra8dg6e2rJaIk6EHg3K8Eyso7T45ekZNhm_rz2ApdQphCA'
+
 });
 
 const $ = id => document.getElementById(id);
